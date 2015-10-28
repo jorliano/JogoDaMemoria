@@ -1,2 +1,2 @@
 # JogoDaMemoria
-Joga da memoria no Aandroid Studio
+Jogo da memoria no Aandroid Studio

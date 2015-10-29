@@ -16,6 +16,7 @@ import android.widget.Toast;
 import java.util.Random;
 
 import br.com.jortec.jogodamemoria.adapter.GridAdapter;
+import me.drakeet.materialdialog.MaterialDialog;
 
 public class TelaJogoActivity extends AppCompatActivity {
     private GridView gridView;
@@ -23,7 +24,9 @@ public class TelaJogoActivity extends AppCompatActivity {
     int[] listaAux;
     long itemSelecionado;
     int posicaoSelecionado;
-    int nivel = 3;
+    int nivel = 1;
+    boolean fimJogo = true;
+    MaterialDialog materialDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +50,7 @@ public class TelaJogoActivity extends AppCompatActivity {
 
                 // Toast.makeText(getBaseContext()," Posição : "+position+" id : "+id ,Toast.LENGTH_LONG).show();
 
-                if (id == R.drawable.carta_virada) {
+                if (id == R.drawable.card) {
                     lista[position] = listaAux[position];
                     gridView.invalidateViews();
 
@@ -62,8 +65,8 @@ public class TelaJogoActivity extends AppCompatActivity {
                             handler.postDelayed(new Runnable() {
                                 public void run() {
                                     // código a ser executado após o tempo de delay
-                                    lista[posicaoSelecionado] = R.drawable.carta_virada;
-                                    lista[position] = R.drawable.carta_virada;
+                                    lista[posicaoSelecionado] = R.drawable.card;
+                                    lista[position] = R.drawable.card;
                                     gridView.invalidateViews();
                                     itemSelecionado = 0;
                                     posicaoSelecionado = 0;
@@ -76,9 +79,41 @@ public class TelaJogoActivity extends AppCompatActivity {
                                 }
                             }).start();*/
                         } else {
-                            Toast.makeText(getBaseContext(), "Parabéns ", Toast.LENGTH_SHORT).show();
+                            // Toast.makeText(getBaseContext(), "Parabéns ", Toast.LENGTH_SHORT).show();
                             itemSelecionado = 0;
                             posicaoSelecionado = 0;
+
+                            //Ver se o jogo terminou
+                          /*  for (int i = 0; i < lista.length; i++) {
+                                fimJogo = true;
+                                if (lista[i] == R.drawable.card) {
+                                    fimJogo = false;
+                                }
+                            }
+                            if (fimJogo) {
+                                materialDialog = new MaterialDialog(view.getContext())
+                                        .setTitle("MaterialDialog")
+                                        .setMessage("Parabéns você filinalizou o jogo, Deseja reiniciar ?")
+                                        .setPositiveButton("OK", new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                lista = new int[nivel];
+                                                for (int i = 0; i < nivel; i++) {
+                                                    lista[i] = R.drawable.card;
+                                                }
+                                                gridView.invalidateViews();
+                                            }
+                                        })
+                                        .setNegativeButton("CANCEL", new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                materialDialog.dismiss();
+                                            }
+                                        });
+
+                                materialDialog.show();
+
+                            }*/
                         }
                     } else {
                         itemSelecionado = listaAux[position];
@@ -99,7 +134,7 @@ public class TelaJogoActivity extends AppCompatActivity {
     public void carregarTabuleiro(int nivel) {
         lista = new int[nivel];
         for (int i = 0; i < nivel; i++) {
-            lista[i] = R.drawable.carta_virada;
+            lista[i] = R.drawable.card;
         }
 
         int[] listaImagens = new int[]{R.drawable.card1, R.drawable.card2, R.drawable.card3, R.drawable.card4, R.drawable.card5,
@@ -129,6 +164,7 @@ public class TelaJogoActivity extends AppCompatActivity {
             v[j] = temp;
         }
     }
+
 
 
     @Override

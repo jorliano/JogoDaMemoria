@@ -2,5 +2,6 @@
     <string name="app_name">JogoDaMemoria</string>
     <string name="title_activity_tela_jogo">TelaJogoActivity</string>
 
-    <string name="action_settings">Settings</string>
+    <string name="action_reiniciar">reiniciar</string>
+    <string name="jogo_da_memoria">Jogo da Memoria</string>
 </resources>

@@ -4,12 +4,14 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Chronometer;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -20,11 +22,14 @@ import me.drakeet.materialdialog.MaterialDialog;
 
 public class TelaJogoActivity extends AppCompatActivity {
     private GridView gridView;
+    private Toolbar toolbar;
+    private Chronometer cronometro;
     int[] lista;
     int[] listaAux;
+    int[] listaImagens;
     long itemSelecionado;
-    int posicaoSelecionado;
-    int nivel = 1;
+    int posicaoSelecionado, nivel = 1;
+    long tempo;
     boolean fimJogo = true;
     MaterialDialog materialDialog;
 
@@ -33,12 +38,41 @@ public class TelaJogoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_jogo);
 
-        if(nivel == 1)
-        carregarTabuleiro(12);
-        if(nivel == 2)
-        carregarTabuleiro(16);
-        if (nivel == 3)
-        carregarTabuleiro(20);
+       listaImagens = new int[]{R.drawable.card1, R.drawable.card2, R.drawable.card3, R.drawable.card4, R.drawable.card5,
+                R.drawable.card6, R.drawable.card7, R.drawable.card8, R.drawable.card9, R.drawable.card10};
+
+        if(savedInstanceState != null) {
+            int tamanho = 12;
+            if(nivel == 2)
+                tamanho = 16;
+            else if (nivel == 3)
+                tamanho = 20;
+
+            lista = new int [tamanho];
+            listaAux = new int[tamanho];
+            for (int i = 0;i < tamanho; i++){
+                lista[i] = Integer.parseInt(savedInstanceState.getString("lista"+i));
+                listaAux[i] = Integer.parseInt(savedInstanceState.getString("listaAux"+i));
+            }
+            tempo = Long.parseLong(savedInstanceState.getString("tempo"));
+        }else{
+            if(nivel == 1)
+                carregarTabuleiro(12);
+            if(nivel == 2)
+                carregarTabuleiro(16);
+            if (nivel == 3)
+                carregarTabuleiro(20);
+        }
+
+
+        toolbar = (Toolbar) findViewById(R.id.jogo_toolbar);
+        toolbar.setTitle(R.string.jogo_da_memoria);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        cronometro = (Chronometer) findViewById(R.id.chronometer);
+        cronometro.setBase(SystemClock.elapsedRealtime() - tempo);
+        cronometro.start();
 
         gridView = (GridView) findViewById(R.id.gridView);
         gridView.setAdapter(new GridAdapter(this, lista));
@@ -84,27 +118,26 @@ public class TelaJogoActivity extends AppCompatActivity {
                             posicaoSelecionado = 0;
 
                             //Ver se o jogo terminou
-                          /*  for (int i = 0; i < lista.length; i++) {
+                            for (int i = 0; i < lista.length; i++) {
                                 fimJogo = true;
                                 if (lista[i] == R.drawable.card) {
                                     fimJogo = false;
+                                    break;
                                 }
                             }
                             if (fimJogo) {
+                                cronometro.stop();
                                 materialDialog = new MaterialDialog(view.getContext())
                                         .setTitle("MaterialDialog")
-                                        .setMessage("Parabéns você filinalizou o jogo, Deseja reiniciar ?")
-                                        .setPositiveButton("OK", new View.OnClickListener() {
+                                        .setMessage("Parabéns você filinalizou o jogo em "+cronometro.getBase()+", Deseja reiniciar ?")
+                                        .setPositiveButton("SIM", new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
-                                                lista = new int[nivel];
-                                                for (int i = 0; i < nivel; i++) {
-                                                    lista[i] = R.drawable.card;
-                                                }
-                                                gridView.invalidateViews();
+                                                reiniciar();
+                                                materialDialog.dismiss();
                                             }
                                         })
-                                        .setNegativeButton("CANCEL", new View.OnClickListener() {
+                                        .setNegativeButton("NÂO", new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
                                                 materialDialog.dismiss();
@@ -113,7 +146,7 @@ public class TelaJogoActivity extends AppCompatActivity {
 
                                 materialDialog.show();
 
-                            }*/
+                            }
                         }
                     } else {
                         itemSelecionado = listaAux[position];
@@ -136,9 +169,6 @@ public class TelaJogoActivity extends AppCompatActivity {
         for (int i = 0; i < nivel; i++) {
             lista[i] = R.drawable.card;
         }
-
-        int[] listaImagens = new int[]{R.drawable.card1, R.drawable.card2, R.drawable.card3, R.drawable.card4, R.drawable.card5,
-                R.drawable.card6, R.drawable.card7, R.drawable.card8, R.drawable.card9, R.drawable.card10};
 
         listaAux = new int[nivel];
         for (int i = 0; i < nivel; i ++){
@@ -164,6 +194,17 @@ public class TelaJogoActivity extends AppCompatActivity {
             v[j] = temp;
         }
     }
+    //Reiniciar o jogo
+    public void  reiniciar(){
+
+        for (int i = 0; i < lista.length; i++) {
+            lista[i] = R.drawable.card;
+        }
+        gridView.invalidateViews();
+        embaralhar(listaAux);
+        cronometro.setBase(SystemClock.elapsedRealtime());
+        cronometro.start();
+    }
 
 
 
@@ -182,10 +223,26 @@ public class TelaJogoActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if(id == android.R.id.home){
+            finish();
+        }
+        if (id == R.id.action_reiniciar) {
+            reiniciar();
         }
 
-        return super.onOptionsItemSelected(item);
+        return true;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(lista != null && listaAux != null) {
+            for (int i = 0;i < lista.length; i++){
+                outState.putString("lista"+i, String.valueOf(lista[i]));
+                outState.putString("listaAux"+i, String.valueOf(listaAux[i]));
+            }
+
+            outState.putString("tempo", String.valueOf(SystemClock.elapsedRealtime() - cronometro.getBase()));
+        }
     }
 }

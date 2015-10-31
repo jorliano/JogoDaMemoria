@@ -1,5 +1,6 @@
 package br.com.jortec.jogodamemoria;
 
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,7 @@ public class TelaJogoActivity extends AppCompatActivity {
     private GridView gridView;
     private Toolbar toolbar;
     private Chronometer cronometro;
+    private MediaPlayer player;
     int[] lista;
     int[] listaAux;
     int[] listaImagens;
@@ -93,6 +95,7 @@ public class TelaJogoActivity extends AppCompatActivity {
 
                         //Compara se são iquais caso não seja vira as cartas novamente
                         if (itemSelecionado != listaAux[position]) {
+                            executarMusicaArquivo( R.raw.erro);
                             //Thread para demorar um tempo
                             Handler handler = new Handler();
                             long delay = 1000; // tempo de delay em millisegundos
@@ -116,6 +119,7 @@ public class TelaJogoActivity extends AppCompatActivity {
                             // Toast.makeText(getBaseContext(), "Parabéns ", Toast.LENGTH_SHORT).show();
                             itemSelecionado = 0;
                             posicaoSelecionado = 0;
+                            executarMusicaArquivo( R.raw.acerto);
 
                             //Ver se o jogo terminou
                             for (int i = 0; i < lista.length; i++) {
@@ -128,8 +132,8 @@ public class TelaJogoActivity extends AppCompatActivity {
                             if (fimJogo) {
                                 cronometro.stop();
                                 materialDialog = new MaterialDialog(view.getContext())
-                                        .setTitle("MaterialDialog")
-                                        .setMessage("Parabéns você filinalizou o jogo em "+cronometro.getBase()+", Deseja reiniciar ?")
+                                        .setTitle("Fim de Jogo")
+                                        .setMessage("Parabéns você filinalizou o jogo , Deseja reiniciar ?")
                                         .setPositiveButton("SIM", new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
@@ -157,7 +161,6 @@ public class TelaJogoActivity extends AppCompatActivity {
                 } else {
 
                 }
-
 
             }
         });
@@ -232,6 +235,12 @@ public class TelaJogoActivity extends AppCompatActivity {
 
         return true;
     }
+
+    public void executarMusicaArquivo(int toque){
+        player = MediaPlayer.create(this, toque);
+        player.start();
+    }
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {

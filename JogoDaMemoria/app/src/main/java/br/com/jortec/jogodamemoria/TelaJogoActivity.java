@@ -30,7 +30,7 @@ public class TelaJogoActivity extends AppCompatActivity {
     int[] listaAux;
     int[] listaImagens;
     long itemSelecionado;
-    int posicaoSelecionado, nivel = 1;
+    int posicaoSelecionado, nivel = 3;
     long tempo;
     boolean fimJogo = true;
     MaterialDialog materialDialog;
@@ -40,7 +40,7 @@ public class TelaJogoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_jogo);
 
-       listaImagens = new int[]{R.drawable.card1, R.drawable.card2, R.drawable.card3, R.drawable.card4, R.drawable.card5,
+       listaImagens = new int[]{ R.drawable.card1,R.drawable.card2, R.drawable.card3, R.drawable.card4, R.drawable.card5,
                 R.drawable.card6, R.drawable.card7, R.drawable.card8, R.drawable.card9, R.drawable.card10};
 
         if(savedInstanceState != null) {

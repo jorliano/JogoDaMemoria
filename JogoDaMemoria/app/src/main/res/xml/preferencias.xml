@@ -7,7 +7,7 @@
             android:summary="@string/nivel_sumario"
             android:entries="@array/niveis"
             android:entryValues="@array/opcoes"
-            android:defaultValue="0"/>
+            android:defaultValue="1"/>
 
         <ListPreference
             android:key="tema"
@@ -15,7 +15,7 @@
             android:summary="@string/tema_sumario"
             android:entries="@array/temas"
             android:entryValues="@array/op_tema"
-            android:defaultValue="0"/>
+            android:defaultValue="1"/>
 
         <SwitchPreference
             android:key="som"

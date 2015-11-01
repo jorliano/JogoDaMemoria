@@ -30,10 +30,10 @@ public class TelaJogoActivity extends AppCompatActivity {
     int[] listaAux;
     int[] listaImagens;
     long itemSelecionado;
-    int posicaoSelecionado, cartaVirada = R.drawable.card,tamanho;
+    int posicaoSelecionado, cartaVirada = R.drawable.card, tamanho;
     long tempo;
     boolean fimJogo = true, desligarSom = false;
-    String nivel ="1",tema = "1";
+    String nivel = "1", tema = "1";
     MaterialDialog materialDialog;
 
     @Override
@@ -44,43 +44,49 @@ public class TelaJogoActivity extends AppCompatActivity {
 
         //Pegar as preferencias do jogo
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        nivel = preferences.getString("nivel", "0");
-        tema = preferences.getString("tema", "0");
-        if (preferences.getBoolean("som", false))
-           desligarSom = true;
+            nivel = preferences.getString("nivel", "1");
+            tema = preferences.getString("tema", "1");
 
-        if(tema.equals("1")) {
-           cartaVirada = R.drawable.card;
-           listaImagens = new int[]{R.drawable.card1, R.drawable.card2, R.drawable.card3, R.drawable.card4, R.drawable.card5,
-                   R.drawable.card6, R.drawable.card7, R.drawable.card8, R.drawable.card9, R.drawable.card10};
-        }else if(tema.equals("2")){
-           cartaVirada = R.drawable.cardjogo;
-           listaImagens = new int[]{R.drawable.cardjogo1, R.drawable.cardjogo2, R.drawable.cardjogo3, R.drawable.cardjogo4, R.drawable.cardjogo5,
-                   R.drawable.cardjogo6, R.drawable.cardjogo7, R.drawable.cardjogo8, R.drawable.cardjogo9, R.drawable.cardjogo10};
-       }
+        if (preferences.getBoolean("som", false))
+            desligarSom = true;
+
+        if (tema.equals("1")) {
+            cartaVirada = R.drawable.card;
+            listaImagens = new int[]{R.drawable.card1, R.drawable.card2, R.drawable.card3, R.drawable.card4, R.drawable.card5,
+                    R.drawable.card6, R.drawable.card7, R.drawable.card8, R.drawable.card9, R.drawable.card10};
+        } else if (tema.equals("2")) {
+            cartaVirada = R.drawable.cardjogo;
+            listaImagens = new int[]{R.drawable.cardjogo1, R.drawable.cardjogo2, R.drawable.cardjogo3, R.drawable.cardjogo4, R.drawable.cardjogo5,
+                    R.drawable.cardjogo6, R.drawable.cardjogo7, R.drawable.cardjogo8, R.drawable.cardjogo9, R.drawable.cardjogo10};
+        }
 
         //Pegar dados ao rotacionar a tela
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             itemSelecionado = Long.parseLong(savedInstanceState.getString("itemSelecionado"));
             posicaoSelecionado = Integer.parseInt(savedInstanceState.getString("posicaoSelecionado"));
 
-            tamanho = 12;
-            if(nivel.equals("2"))
+            if(nivel.equals("1"))
+                tamanho = 12;
+            if (nivel.equals("2"))
                 tamanho = 16;
             else if (nivel.equals("3"))
                 tamanho = 20;
 
-            lista = new int [tamanho];
+            lista = new int[tamanho];
             listaAux = new int[tamanho];
-            for (int i = 0;i < tamanho; i++){
-                lista[i] = Integer.parseInt(savedInstanceState.getString("lista"+i));
-                listaAux[i] = Integer.parseInt(savedInstanceState.getString("listaAux"+i));
+            for (int i = 0; i < tamanho; i++) {
+                lista[i] = Integer.parseInt(savedInstanceState.getString("lista" + i));
+                listaAux[i] = Integer.parseInt(savedInstanceState.getString("listaAux" + i));
             }
             tempo = Long.parseLong(savedInstanceState.getString("tempo"));
-        }else{
-            if(nivel.equals("1"))
+
+            cronometro = (Chronometer) findViewById(R.id.chronometer);
+            cronometro.setBase(SystemClock.elapsedRealtime() - tempo);
+            cronometro.start();
+        } else {
+            if (nivel.equals("1"))
                 carregarTabuleiro(12);
-            if(nivel.equals("2"))
+            if (nivel.equals("2"))
                 carregarTabuleiro(16);
             if (nivel.equals("3"))
                 carregarTabuleiro(20);
@@ -91,6 +97,8 @@ public class TelaJogoActivity extends AppCompatActivity {
         toolbar.setTitle(R.string.jogo_da_memoria);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        cronometro = (Chronometer) findViewById(R.id.chronometer);
 
         gridView = (GridView) findViewById(R.id.gridView);
         gridView.setAdapter(new GridAdapter(this, lista));
@@ -179,14 +187,14 @@ public class TelaJogoActivity extends AppCompatActivity {
     public void carregarTabuleiro(final int nivel) {
         lista = new int[nivel];
         for (int i = 0; i < nivel; i++) {
-            lista[i] =  cartaVirada;
+            lista[i] = cartaVirada;
         }
 
         listaAux = new int[nivel];
-        for (int i = 0; i < nivel; i ++){
-            if(i >= nivel/2  ){
-                listaAux[i] = listaImagens[i - nivel/2];
-            }else{
+        for (int i = 0; i < nivel; i++) {
+            if (i >= nivel / 2) {
+                listaAux[i] = listaImagens[i - nivel / 2];
+            } else {
                 listaAux[i] = listaImagens[i];
             }
         }
@@ -194,11 +202,11 @@ public class TelaJogoActivity extends AppCompatActivity {
         embaralhar(listaAux);
 
         new Thread(new Runnable() {
-             public void run() {
-                 //mostar cartas
-                 for (int i = 0; i < nivel; i++) {
-                     lista[i] = listaAux[i];
-                 }
+            public void run() {
+                //mostar cartas
+                for (int i = 0; i < nivel; i++) {
+                    lista[i] = listaAux[i];
+                }
             }
         }).start();
         //Thread para demorar um tempo
@@ -211,7 +219,6 @@ public class TelaJogoActivity extends AppCompatActivity {
                     lista[i] = cartaVirada;
                 }
                 gridView.invalidateViews();
-                cronometro = (Chronometer) findViewById(R.id.chronometer);
                 cronometro.setBase(SystemClock.elapsedRealtime());
                 cronometro.start();
             }
@@ -232,13 +239,14 @@ public class TelaJogoActivity extends AppCompatActivity {
             v[j] = temp;
         }
     }
+
     //Reiniciar o jogo
-    public void  reiniciar(){
+    public void reiniciar() {
         embaralhar(listaAux);
         cronometro.stop();
         for (int i = 0; i < lista.length; i++) {
-           lista[i] =  listaAux[i];
-         }
+            lista[i] = listaAux[i];
+        }
         gridView.invalidateViews();
         //Thread para demorar um tempo
         Handler handler = new Handler();
@@ -250,14 +258,12 @@ public class TelaJogoActivity extends AppCompatActivity {
                     lista[i] = cartaVirada;
                 }
                 gridView.invalidateViews();
-                cronometro = (Chronometer) findViewById(R.id.chronometer);
                 cronometro.setBase(SystemClock.elapsedRealtime());
                 cronometro.start();
             }
         }, delay);
 
     }
-
 
 
     @Override
@@ -275,7 +281,7 @@ public class TelaJogoActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if(id == android.R.id.home){
+        if (id == android.R.id.home) {
             finish();
         }
         if (id == R.id.action_reiniciar) {
@@ -285,8 +291,8 @@ public class TelaJogoActivity extends AppCompatActivity {
         return true;
     }
 
-    public void executarMusicaArquivo(int toque){
-        if(desligarSom){
+    public void executarMusicaArquivo(int toque) {
+        if (desligarSom) {
             player = MediaPlayer.create(this, toque);
             player.start();
         }
@@ -296,10 +302,10 @@ public class TelaJogoActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(lista != null && listaAux != null) {
-            for (int i = 0;i < lista.length; i++){
-                outState.putString("lista"+i, String.valueOf(lista[i]));
-                outState.putString("listaAux"+i, String.valueOf(listaAux[i]));
+        if (lista != null && listaAux != null) {
+            for (int i = 0; i < lista.length; i++) {
+                outState.putString("lista" + i, String.valueOf(lista[i]));
+                outState.putString("listaAux" + i, String.valueOf(listaAux[i]));
             }
 
             outState.putString("tempo", String.valueOf(SystemClock.elapsedRealtime() - cronometro.getBase()));

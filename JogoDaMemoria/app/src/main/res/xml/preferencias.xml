@@ -6,16 +6,16 @@
             android:title="Nivel"
             android:summary="@string/nivel_sumario"
             android:entries="@array/niveis"
-            android:defaultValue="true"
-            android:entryValues="@array/opcoes"/>
+            android:entryValues="@array/opcoes"
+            android:defaultValue="0"/>
 
         <ListPreference
             android:key="tema"
             android:title="Tema"
             android:summary="@string/tema_sumario"
             android:entries="@array/temas"
-            android:defaultValue="true"
-            android:entryValues="@array/op_tema"/>
+            android:entryValues="@array/op_tema"
+            android:defaultValue="0"/>
 
         <SwitchPreference
             android:key="som"

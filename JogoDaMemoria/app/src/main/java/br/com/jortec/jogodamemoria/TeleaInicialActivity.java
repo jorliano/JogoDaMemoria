@@ -1,6 +1,7 @@
 package br.com.jortec.jogodamemoria;
 
 import android.content.Intent;
+import android.preference.Preference;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,6 +11,7 @@ import android.widget.Button;
 
 public class TeleaInicialActivity extends AppCompatActivity {
     private Button btPlay ;
+    private Button btPreferencia;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,10 +19,18 @@ public class TeleaInicialActivity extends AppCompatActivity {
         setContentView(R.layout.activity_telea_inicial);
 
         btPlay = (Button) findViewById(R.id.bt_play);
+        btPreferencia = (Button) findViewById(R.id.btPreferencias);
+
         btPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(v.getContext(),TelaJogoActivity.class));
+            }
+        });
+        btPreferencia.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(v.getContext(), PreferenciaActivity.class));
             }
         });
     }

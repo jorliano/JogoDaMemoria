@@ -1,8 +1,10 @@
 package br.com.jortec.jogodamemoria;
 
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -11,10 +13,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import java.util.Random;
 
@@ -30,9 +30,10 @@ public class TelaJogoActivity extends AppCompatActivity {
     int[] listaAux;
     int[] listaImagens;
     long itemSelecionado;
-    int posicaoSelecionado, nivel = 3;
+    int posicaoSelecionado, cartaVirada = R.drawable.card;
     long tempo;
-    boolean fimJogo = true;
+    boolean fimJogo = true, desligarSom = false;
+    String nivel ="1",tema;
     MaterialDialog materialDialog;
 
     @Override
@@ -40,14 +41,33 @@ public class TelaJogoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_jogo);
 
-       listaImagens = new int[]{ R.drawable.card1,R.drawable.card2, R.drawable.card3, R.drawable.card4, R.drawable.card5,
-                R.drawable.card6, R.drawable.card7, R.drawable.card8, R.drawable.card9, R.drawable.card10};
 
+        //Pegar as preferencias do jogo
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        nivel = preferences.getString("nivel", "0");
+        tema = preferences.getString("tema", "0");
+        Log.i("Tema", tema );
+        if (preferences.getBoolean("som", false))
+           desligarSom = true;
+       if(tema.equals("1")) {
+           cartaVirada = R.drawable.card;
+           listaImagens = new int[]{R.drawable.card1, R.drawable.card2, R.drawable.card3, R.drawable.card4, R.drawable.card5,
+                   R.drawable.card6, R.drawable.card7, R.drawable.card8, R.drawable.card9, R.drawable.card10};
+       }else if(tema.equals("2")){
+           cartaVirada = R.drawable.cardjogo;
+           listaImagens = new int[]{R.drawable.cardjogo1, R.drawable.cardjogo2, R.drawable.cardjogo3, R.drawable.cardjogo4, R.drawable.cardjogo5,
+                   R.drawable.cardjogo6, R.drawable.cardjogo7, R.drawable.cardjogo8, R.drawable.cardjogo9, R.drawable.cardjogo10};
+       }
+
+        //Pegar dados ao rotacionar a tela
         if(savedInstanceState != null) {
+            itemSelecionado = Long.parseLong(savedInstanceState.getString("itemSelecionado"));
+            posicaoSelecionado = Integer.parseInt(savedInstanceState.getString("posicaoSelecionado"));
+
             int tamanho = 12;
-            if(nivel == 2)
+            if(nivel.equals("2"))
                 tamanho = 16;
-            else if (nivel == 3)
+            else if (nivel.equals("3"))
                 tamanho = 20;
 
             lista = new int [tamanho];
@@ -58,11 +78,11 @@ public class TelaJogoActivity extends AppCompatActivity {
             }
             tempo = Long.parseLong(savedInstanceState.getString("tempo"));
         }else{
-            if(nivel == 1)
+            if(nivel.equals("1"))
                 carregarTabuleiro(12);
-            if(nivel == 2)
+            if(nivel.equals("2"))
                 carregarTabuleiro(16);
-            if (nivel == 3)
+            if (nivel.equals("3"))
                 carregarTabuleiro(20);
         }
 
@@ -86,7 +106,7 @@ public class TelaJogoActivity extends AppCompatActivity {
 
                 // Toast.makeText(getBaseContext()," Posição : "+position+" id : "+id ,Toast.LENGTH_LONG).show();
 
-                if (id == R.drawable.card) {
+                if (id ==  cartaVirada) {
                     lista[position] = listaAux[position];
                     gridView.invalidateViews();
 
@@ -102,21 +122,15 @@ public class TelaJogoActivity extends AppCompatActivity {
                             handler.postDelayed(new Runnable() {
                                 public void run() {
                                     // código a ser executado após o tempo de delay
-                                    lista[posicaoSelecionado] = R.drawable.card;
-                                    lista[position] = R.drawable.card;
+                                    lista[posicaoSelecionado] =  cartaVirada;
+                                    lista[position] =  cartaVirada;
                                     gridView.invalidateViews();
                                     itemSelecionado = 0;
                                     posicaoSelecionado = 0;
                                 }
                             }, delay);
-
-                        /*    new Thread(new Runnable() {
-                                public void run() {
-                                    SystemClock.sleep(1000);
-                                }
-                            }).start();*/
-                        } else {
-                            // Toast.makeText(getBaseContext(), "Parabéns ", Toast.LENGTH_SHORT).show();
+                        }
+                        else {
                             itemSelecionado = 0;
                             posicaoSelecionado = 0;
                             executarMusicaArquivo( R.raw.acerto);
@@ -124,7 +138,7 @@ public class TelaJogoActivity extends AppCompatActivity {
                             //Ver se o jogo terminou
                             for (int i = 0; i < lista.length; i++) {
                                 fimJogo = true;
-                                if (lista[i] == R.drawable.card) {
+                                if (lista[i] ==  cartaVirada) {
                                     fimJogo = false;
                                     break;
                                 }
@@ -170,7 +184,7 @@ public class TelaJogoActivity extends AppCompatActivity {
     public void carregarTabuleiro(int nivel) {
         lista = new int[nivel];
         for (int i = 0; i < nivel; i++) {
-            lista[i] = R.drawable.card;
+            lista[i] =  cartaVirada;
         }
 
         listaAux = new int[nivel];
@@ -201,7 +215,7 @@ public class TelaJogoActivity extends AppCompatActivity {
     public void  reiniciar(){
 
         for (int i = 0; i < lista.length; i++) {
-            lista[i] = R.drawable.card;
+            lista[i] =  cartaVirada;
         }
         gridView.invalidateViews();
         embaralhar(listaAux);
@@ -237,8 +251,10 @@ public class TelaJogoActivity extends AppCompatActivity {
     }
 
     public void executarMusicaArquivo(int toque){
-        player = MediaPlayer.create(this, toque);
-        player.start();
+        if(desligarSom){
+            player = MediaPlayer.create(this, toque);
+            player.start();
+        }
     }
 
 
@@ -252,6 +268,9 @@ public class TelaJogoActivity extends AppCompatActivity {
             }
 
             outState.putString("tempo", String.valueOf(SystemClock.elapsedRealtime() - cronometro.getBase()));
+
+            outState.putString("itemSelecionado", String.valueOf(itemSelecionado));
+            outState.putString("posicaoSelecionado", String.valueOf(posicaoSelecionado));
         }
     }
 }

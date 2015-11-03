@@ -18,8 +18,9 @@
         android:textSize="30sp"
         android:elegantTextHeight="false"
         android:nestedScrollingEnabled="false"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerInParent="true"
+        android:layout_gravity="center_vertical"
+        android:gravity="center" />
 
     <Button
         android:layout_width="wrap_content"

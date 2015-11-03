@@ -5,9 +5,9 @@
     <string name="action_reiniciar">reiniciar</string>
     <string name="jogo_da_memoria">Jogo da Memoria</string>
     <string name="preferencias">Configuração</string>
-    <string name="som_sumario">Deseeja usar ou não o som</string>
+    <string name="som_sumario">Configuração para habilitar ou desbilitar o som</string>
     <string name="som_titulo">Som</string>
-    <string name="Preferencias">preferencias</string>
+    <string name="Preferencias">Preferencias</string>
     <string name="nivel_sumario">Selecione um nivel</string>
     <string name="iniciar">Iniciar Jogo</string>
     <string name="tema_sumario">Selecione um tema para o jogo</string>

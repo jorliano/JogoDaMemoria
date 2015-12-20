@@ -24,7 +24,8 @@ public class TeleaInicialActivity extends AppCompatActivity {
         btPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(v.getContext(),TelaJogoActivity.class));
+               startActivity(new Intent(v.getContext(),TelaJogoActivity.class));
+               // startActivity(new Intent(v.getContext(),TelaTeste.class));
             }
         });
         btPreferencia.setOnClickListener(new View.OnClickListener() {

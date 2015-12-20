@@ -1,5 +1,6 @@
 package br.com.jortec.jogodamemoria;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Handler;
@@ -7,22 +8,33 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Chronometer;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.Random;
 
 import br.com.jortec.jogodamemoria.adapter.GridAdapter;
+import br.com.jortec.jogodamemoria.adapter.RecycleAdapter;
+import br.com.jortec.jogodamemoria.interfaces.RecyclerViewOnclickListener;
 import me.drakeet.materialdialog.MaterialDialog;
 
-public class TelaJogoActivity extends AppCompatActivity {
-    private GridView gridView;
+public class TelaJogoActivity extends AppCompatActivity implements RecyclerViewOnclickListener{
+    //private GridView gridView;
+    RecycleAdapter adapter;
+    private RecyclerView recyclerView;
+    private int tamanhoGrid = 4;
     private Toolbar toolbar;
     private Chronometer cronometro;
     private MediaPlayer player;
@@ -64,6 +76,7 @@ public class TelaJogoActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             itemSelecionado = Long.parseLong(savedInstanceState.getString("itemSelecionado"));
             posicaoSelecionado = Integer.parseInt(savedInstanceState.getString("posicaoSelecionado"));
+            tamanhoGrid = 6;
 
             if(nivel.equals("1"))
                 tamanho = 12;
@@ -100,88 +113,97 @@ public class TelaJogoActivity extends AppCompatActivity {
 
         cronometro = (Chronometer) findViewById(R.id.chronometer);
 
-        gridView = (GridView) findViewById(R.id.gridView);
-        gridView.setAdapter(new GridAdapter(this, lista));
+       // gridView = (GridView) findViewById(R.id.gridView);
+       // gridView.setAdapter(new GridAdapter(this, lista));
+
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_listjogo);
+        recyclerView.setHasFixedSize(true);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,tamanhoGrid,GridLayoutManager.VERTICAL,false);
+        recyclerView.setLayoutManager(layoutManager);
+
+        adapter = new RecycleAdapter(this,lista);
+        adapter.setRecyclerViewOnclickListener(this);
+        recyclerView.setAdapter(adapter);
 
 
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+    }
 
-                // Toast.makeText(getBaseContext()," Posição : "+position+" id : "+id ,Toast.LENGTH_LONG).show();
+    //Evento dos clicks
+    @Override
+    public void onclickListener(View view, final int position) {
 
-                if (id == cartaVirada) {
-                    lista[position] = listaAux[position];
-                    gridView.invalidateViews();
+      //  Toast.makeText(this, "carta virada " + cartaVirada +" "+ position, Toast.LENGTH_SHORT).show();
+        if (cartaVirada == lista[position] ) {
+            lista[position] = listaAux[position];
+            //gridView.invalidateViews();
+            recyclerView.setAdapter(adapter);
+            recyclerView.invalidate();
 
-                    if (itemSelecionado != 0 && posicaoSelecionado != position) {
+            if (itemSelecionado != 0 && posicaoSelecionado != position) {
 
 
-                        //Compara se são iquais caso não seja vira as cartas novamente
-                        if (itemSelecionado != listaAux[position]) {
-                            executarMusicaArquivo(R.raw.erro);
-                            //Thread para demorar um tempo
-                            Handler handler = new Handler();
-                            long delay = 1000; // tempo de delay em millisegundos
-                            handler.postDelayed(new Runnable() {
-                                public void run() {
-                                    // código a ser executado após o tempo de delay
-                                    lista[posicaoSelecionado] = cartaVirada;
-                                    lista[position] = cartaVirada;
-                                    gridView.invalidateViews();
-                                    itemSelecionado = 0;
-                                    posicaoSelecionado = 0;
-                                }
-                            }, delay);
-                        } else {
+                //Compara se são iquais caso não seja vira as cartas novamente
+                if (itemSelecionado != listaAux[position]) {
+                    executarMusicaArquivo(R.raw.erro);
+                    //Thread para demorar um tempo
+                    Handler handler = new Handler();
+                    long delay = 500; // tempo de delay em millisegundos
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            // código a ser executado após o tempo de delay
+                            lista[posicaoSelecionado] = cartaVirada;
+                            lista[position] = cartaVirada;
+                            recyclerView.setAdapter(adapter);
+                            recyclerView.invalidate();
                             itemSelecionado = 0;
                             posicaoSelecionado = 0;
-                            executarMusicaArquivo(R.raw.acerto);
-
-                            //Ver se o jogo terminou
-                            for (int i = 0; i < lista.length; i++) {
-                                fimJogo = true;
-                                if (lista[i] == cartaVirada) {
-                                    fimJogo = false;
-                                    break;
-                                }
-                            }
-                            if (fimJogo) {
-                                cronometro.stop();
-                                materialDialog = new MaterialDialog(view.getContext())
-                                        .setTitle("Fim de Jogo")
-                                        .setMessage("Parabéns você filinalizou o jogo , Deseja reiniciar ?")
-                                        .setPositiveButton("SIM", new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                reiniciar();
-                                                materialDialog.dismiss();
-                                            }
-                                        })
-                                        .setNegativeButton("NÂO", new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                materialDialog.dismiss();
-                                            }
-                                        });
-
-                                materialDialog.show();
-
-                            }
                         }
-                    } else {
-                        itemSelecionado = listaAux[position];
-                        posicaoSelecionado = position;
-                    }
-
-
+                    }, delay);
                 } else {
+                    itemSelecionado = 0;
+                    posicaoSelecionado = 0;
+                    executarMusicaArquivo(R.raw.acerto);
 
+                    //Ver se o jogo terminou
+                    for (int i = 0; i < lista.length; i++) {
+                        fimJogo = true;
+                        if (lista[i] == cartaVirada) {
+                            fimJogo = false;
+                            break;
+                        }
+                    }
+                    if (fimJogo) {
+                        cronometro.stop();
+                        materialDialog = new MaterialDialog(view.getContext())
+                                .setTitle("Fim de Jogo")
+                                .setMessage("Parabéns você filinalizou o jogo , Deseja reiniciar ?")
+                                .setPositiveButton("SIM", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        reiniciar();
+                                        materialDialog.dismiss();
+                                    }
+                                })
+                                .setNegativeButton("NÂO", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        materialDialog.dismiss();
+                                    }
+                                });
+
+                        materialDialog.show();
+
+                    }
                 }
-
+            } else {
+                itemSelecionado = listaAux[position];
+                posicaoSelecionado = position;
             }
-        });
 
+
+        } else {
+
+        }
     }
 
     public void carregarTabuleiro(final int nivel) {
@@ -218,7 +240,12 @@ public class TelaJogoActivity extends AppCompatActivity {
                 for (int i = 0; i < nivel; i++) {
                     lista[i] = cartaVirada;
                 }
-                gridView.invalidateViews();
+               // gridView.invalidateViews();
+               // recyclerView.invalidate();
+               // adapter = new RecycleAdapter(TelaJogoActivity.this,lista);
+                recyclerView.setAdapter(adapter);
+                recyclerView.invalidate();
+
                 cronometro.setBase(SystemClock.elapsedRealtime());
                 cronometro.start();
             }
@@ -226,6 +253,9 @@ public class TelaJogoActivity extends AppCompatActivity {
 
 
     }
+
+
+
 
     //método estático que embaralha
     public void embaralhar(int[] v) {
@@ -247,7 +277,8 @@ public class TelaJogoActivity extends AppCompatActivity {
         for (int i = 0; i < lista.length; i++) {
             lista[i] = listaAux[i];
         }
-        gridView.invalidateViews();
+        recyclerView.setAdapter(adapter);
+        recyclerView.invalidate();
         //Thread para demorar um tempo
         Handler handler = new Handler();
         long delay = 5000; // tempo de delay em millisegundos
@@ -256,8 +287,11 @@ public class TelaJogoActivity extends AppCompatActivity {
                 // código a ser executado após o tempo de delay
                 for (int i = 0; i < lista.length; i++) {
                     lista[i] = cartaVirada;
+
                 }
-                gridView.invalidateViews();
+                recyclerView.setAdapter(adapter);
+                recyclerView.invalidate();
+
                 cronometro.setBase(SystemClock.elapsedRealtime());
                 cronometro.start();
             }
@@ -314,4 +348,13 @@ public class TelaJogoActivity extends AppCompatActivity {
             outState.putString("posicaoSelecionado", String.valueOf(posicaoSelecionado));
         }
     }
+
+
+
+    @Override
+    public void onLongPressClickListener(View view, int childPosition) {
+        Toast.makeText(this,"onLongPressClickListener",Toast.LENGTH_SHORT).show();
+    }
+
+
 }
